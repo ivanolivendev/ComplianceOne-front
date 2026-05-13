@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OcorrenciaRequest, OcorrenciaResponse, StatusOcorrencia } from '../models/compliance.model';
 
@@ -29,8 +29,12 @@ export class OcorrenciaService {
   }
 
   updateStatus(id: string, status: StatusOcorrencia, observacao: string): Observable<OcorrenciaResponse> {
-    return this.http.patch<OcorrenciaResponse>(`${this.apiUrl}/${id}/status`, null, {
-      params: { status, observacao }
-    });
+    // Usando HttpParams para garantir codificação correta dos caracteres
+    let params = new HttpParams().set('status', status);
+    if (observacao) {
+      params = params.set('observacao', observacao);
+    }
+
+    return this.http.patch<OcorrenciaResponse>(`${this.apiUrl}/${id}/status`, null, { params });
   }
 }

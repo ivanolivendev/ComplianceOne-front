@@ -10,7 +10,7 @@ import { NotificationService } from '../../core/services/notification.service';
   standalone: true,
   imports: [CommonModule, FormsModule, BadgeComponent],
   template: `
-    <div class="min-h-screen bg-slate-50 py-20 px-6">
+    <div class="py-12 px-6">
       <div class="max-w-2xl mx-auto">
         <h1 class="text-4xl font-extrabold text-slate-900 mb-8 text-center">Consultar Status</h1>
         

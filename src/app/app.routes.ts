@@ -1,25 +1,34 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
 import { Role } from './core/models/compliance.model';
+import { PublicLayoutComponent } from './features/public/public-layout.component';
 
 export const routes: Routes = [
-  // Public Routes
+  // Public Portal Layout
   {
     path: '',
-    loadComponent: () => import('./features/public/landing-page.component').then(m => m.LandingPageComponent)
+    component: PublicLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/public/landing-page.component').then(m => m.LandingPageComponent)
+      },
+      {
+        path: 'denunciar',
+        loadComponent: () => import('./features/public/report-wizard.component').then(m => m.ReportWizardComponent)
+      },
+      {
+        path: 'sucesso',
+        loadComponent: () => import('./features/public/success.component').then(m => m.SuccessComponent)
+      },
+      {
+        path: 'protocolo',
+        loadComponent: () => import('./features/public/protocol-view.component').then(m => m.ProtocolViewComponent)
+      }
+    ]
   },
-  {
-    path: 'denunciar',
-    loadComponent: () => import('./features/public/report-wizard.component').then(m => m.ReportWizardComponent)
-  },
-  {
-    path: 'sucesso',
-    loadComponent: () => import('./features/public/success.component').then(m => m.SuccessComponent)
-  },
-  {
-    path: 'protocolo',
-    loadComponent: () => import('./features/public/protocol-view.component').then(m => m.ProtocolViewComponent)
-  },
+
+  // Auth / Login
   {
     path: 'login',
     canActivate: [guestGuard],

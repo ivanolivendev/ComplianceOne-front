@@ -8,23 +8,10 @@ import { ButtonComponent } from '../../shared/components/button.component';
   standalone: true,
   imports: [CommonModule, ButtonComponent],
   template: `
-    <div class="min-h-screen flex flex-col">
-      <!-- Header -->
-      <header class="bg-white border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-navy rounded-xl flex items-center justify-center">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <span class="text-xl font-bold text-navy tracking-tight">ComplianceOne</span>
-        </div>
-        <app-button variant="outline" size="sm" (click)="goToLogin()">Painel Admin</app-button>
-      </header>
-
+    <div class="flex flex-col">
       <!-- Hero Section -->
       <main class="flex-grow flex flex-col">
-        <section class="py-20 px-6 md:px-12 bg-gradient-to-b from-white to-slate-50 text-center">
+        <section class="py-20 px-6 md:px-12 text-center">
           <div class="max-w-4xl mx-auto">
             <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
               Sua voz é fundamental para um <span class="text-navy">ambiente íntegro</span>.
@@ -75,11 +62,6 @@ import { ButtonComponent } from '../../shared/components/button.component';
           </div>
         </section>
       </main>
-
-      <!-- Footer -->
-      <footer class="bg-slate-900 text-slate-400 py-12 px-6 md:px-12 text-center text-sm">
-        <p>&copy; 2026 ComplianceOne. Todos os direitos reservados. Em conformidade com a NR-01.</p>
-      </footer>
     </div>
   `
 })
@@ -88,5 +70,4 @@ export class LandingPageComponent {
 
   goToReport(): void { this.router.navigate(['/denunciar']); }
   goToStatus(): void { this.router.navigate(['/protocolo']); }
-  goToLogin(): void { this.router.navigate(['/login']); }
 }

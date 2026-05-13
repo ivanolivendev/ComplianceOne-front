@@ -13,7 +13,7 @@ import { NotificationService } from '../../core/services/notification.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent],
   template: `
-    <div class="min-h-screen bg-slate-50 py-12 px-6">
+    <div class="py-12 px-6">
       <div class="max-w-2xl mx-auto">
         <!-- Progress Stepper -->
         <div class="flex items-center justify-between mb-12 px-4">

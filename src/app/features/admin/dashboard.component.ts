@@ -154,7 +154,7 @@ export class DashboardComponent implements OnInit {
         this.recentItems = items.slice(0, 5);
         this.stats.total = res.totalElements || items.length;
         this.stats.recebidas = items.filter((i: any) => i.status === StatusOcorrencia.RECEBIDA).length;
-        this.stats.analise = items.filter((i: any) => i.status === StatusOcorrencia.EM_ANALISE).length;
+        this.stats.analise = items.filter((i: any) => i.status === StatusOcorrencia.EM_TRIAGEM || i.status === StatusOcorrencia.EM_INVESTIGACAO).length;
         this.stats.concluidas = items.filter((i: any) => i.status === StatusOcorrencia.CONCLUIDA).length;
         this.loading = false;
         this.cdr.detectChanges();

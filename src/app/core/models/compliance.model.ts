@@ -9,9 +9,10 @@ export enum TipoOcorrencia {
 
 export enum StatusOcorrencia {
   RECEBIDA = 'RECEBIDA',
-  EM_ANALISE = 'EM_ANALISE',
+  EM_TRIAGEM = 'EM_TRIAGEM',
+  EM_INVESTIGACAO = 'EM_INVESTIGACAO',
   CONCLUIDA = 'CONCLUIDA',
-  ARQUIVADA = 'ARQUIVADA'
+  CANCELADA = 'CANCELADA'
 }
 
 export enum Role {
