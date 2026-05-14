@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OcorrenciaRequest, OcorrenciaResponse, StatusOcorrencia } from '../models/compliance.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OcorrenciaService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api/v1/ocorrencias';
+  private readonly apiUrl = `${environment.apiUrl}/ocorrencias`;
 
   create(request: OcorrenciaRequest): Observable<OcorrenciaResponse> {
     return this.http.post<OcorrenciaResponse>(this.apiUrl, request);

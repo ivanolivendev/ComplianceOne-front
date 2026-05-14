@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.git/
+.angular/
+.vscode/
+README.md
+Dockerfile
+nginx.conf
+package-lock.json
+*.docx
+extracted_guide.txt
+temp_docx/

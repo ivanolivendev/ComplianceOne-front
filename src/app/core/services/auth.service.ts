@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthResponse, Role } from '../models/compliance.model';
 import { TokenService } from './token.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenService = inject(TokenService);
   private readonly router = inject(Router);
-  private readonly apiUrl = '/api/v1/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(!!this.tokenService.getToken());
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
