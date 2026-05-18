@@ -53,3 +53,32 @@ export interface User {
   email: string;
   role: Role;
 }
+
+export interface AnexoResponse {
+  id: string;
+  nomeArquivo: string;
+  nomeOriginal?: string;
+  tamanho: number;
+  tipoArquivo: string;
+  hashArquivo: string;
+  dataUpload: string;
+}
+
+export interface AuditoriaResponse {
+  id: string;
+  dataEvento: string;
+  usuario: string;
+  emailUsuario?: string;
+  tipo: string;
+  ip: string;
+  origem: string;
+  descricao: string;
+  statusAnterior?: StatusOcorrencia;
+  statusNovo?: StatusOcorrencia;
+}
+
+export interface AnexoUploadResponse {
+  id: string;
+  nomeArquivo: string;
+  message: string;
+}
