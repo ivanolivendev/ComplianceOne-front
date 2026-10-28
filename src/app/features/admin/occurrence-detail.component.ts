@@ -28,7 +28,12 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
           </app-button>
           <div>
             <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Gerenciar Ocorrência</h1>
-            <p class="text-sm font-mono text-slate-400 font-bold" *ngIf="item">{{ item.protocolo }}</p>
+            <div class="flex items-center gap-2" *ngIf="item">
+              <p class="text-sm font-mono text-slate-400 font-bold">{{ item.protocolo }}</p>
+              <button type="button" (click)="copyProtocol()" class="p-1 rounded text-slate-400 hover:text-navy hover:bg-slate-100" aria-label="Copiar protocolo" title="Copiar protocolo">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8M8 12h8m-7-8h6l4 4v12a2 2 0 01-2 2H9a2 2 0 01-2-2V6a2 2 0 012-2z" /></svg>
+              </button>
+            </div>
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -68,13 +73,22 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <!-- LEFT COLUMN: Tab Content -->
-          <div class="lg:col-span-2 space-y-8">
+          <div class="lg:col-span-3 space-y-8">
             
             <!-- Tab: Details -->
             <div *ngIf="activeTab === 'details'" class="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
               <div class="card-premium p-8">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">Relato do Denunciante</h3>
                 <p class="text-slate-800 leading-relaxed whitespace-pre-wrap text-lg">{{ item.relato }}</p>
+              </div>
+
+              <div class="card-premium p-8 bg-white ring-2 ring-navy/5">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">Atualização do Caso</h3>
+                <div class="space-y-4">
+                  <div><label class="block text-xs font-bold text-slate-500 mb-2">Novo Status</label><select [(ngModel)]="newStatus" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-4 focus:ring-navy/10 outline-none text-sm font-medium bg-slate-50"><option *ngFor="let s of statusOptions" [value]="s">{{ s.replace('_', ' ') }}</option></select></div>
+                  <div><label class="block text-xs font-bold text-slate-500 mb-2">Observação / Justificativa</label><textarea [(ngModel)]="newObservation" rows="4" placeholder="Explique a alteração para fins de compliance..." class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-4 focus:ring-navy/10 outline-none text-sm resize-none"></textarea></div>
+                  <app-button class="w-full" [loading]="updating" [disabled]="!newStatus" (click)="onSave()">Confirmar Alteração</app-button>
+                </div>
               </div>
 
               <div class="card-premium p-8">
@@ -138,6 +152,9 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
 
             <!-- Tab: Timeline -->
             <div *ngIf="activeTab === 'timeline'" class="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
+              <div *ngIf="historico.length === 0" class="card-premium p-12 text-center text-slate-400">
+                <p class="font-medium">Nenhuma atualização registrada para esta ocorrência.</p>
+              </div>
               <div class="relative pl-8 space-y-10 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
                 <div *ngFor="let event of historico" class="relative">
                   <div class="absolute -left-[27px] top-1 w-4 h-4 rounded-full border-4 border-white bg-navy shadow-sm ring-4 ring-navy/10"></div>
@@ -180,9 +197,9 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
           </div>
 
           <!-- RIGHT COLUMN: Actions & Status -->
-          <div class="space-y-8">
+          <div class="hidden space-y-8">
             <div class="card-premium p-8 bg-white ring-2 ring-navy/5 sticky top-8">
-              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">Fluxo de Trabalho</h3>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-100 pb-2">Atualização do Caso</h3>
               
               <div class="space-y-4">
                 <div>
@@ -332,10 +349,15 @@ export class OccurrenceDetailComponent implements OnInit {
   loadHistorico(id: string): void {
     this.auditoriaService.getHistory(id).subscribe({
       next: (res) => {
-        this.historico = res;
+        this.historico = [...res].reverse();
         this.cdr.detectChanges();
       }
     });
+  }
+
+  copyProtocol(): void {
+    if (this.item?.protocolo) navigator.clipboard?.writeText(this.item.protocolo);
+    this.notify.success('Protocolo copiado.');
   }
 
   onSave(): void {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BadgeComponent } from '../../shared/components/badge.component';
 import { OcorrenciaResponse } from '../../core/models/compliance.model';
 import { NotificationService } from '../../core/services/notification.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-protocol-view',
@@ -23,6 +24,7 @@ import { NotificationService } from '../../core/services/notification.service';
                 type="text"
                 placeholder="Ex: NR1-XXXXXXXX"
                 [(ngModel)]="searchProtocol"
+                (ngModelChange)="searchProtocol = ($event || '').toUpperCase().replace(/\\s/g, '')"
                 (keyup.enter)="onSearch()"
                 class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-navy focus:ring-4 focus:ring-navy/10 outline-none bg-white transition-all duration-200"
               />
@@ -89,6 +91,7 @@ import { NotificationService } from '../../core/services/notification.service';
 export class ProtocolViewComponent {
   private readonly notify = inject(NotificationService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
 
   searchProtocol = '';
   loading = false;
@@ -98,6 +101,11 @@ export class ProtocolViewComponent {
   // Valores pré-computados para evitar chamadas de método no template
   formattedTipo = '';
   formattedDate = '';
+
+  ngOnInit(): void {
+    const protocol = this.route.snapshot.queryParamMap.get('protocolo');
+    if (protocol) { this.searchProtocol = protocol; this.onSearch(); }
+  }
 
   async onSearch(): Promise<void> {
     const protocol = this.searchProtocol.trim();

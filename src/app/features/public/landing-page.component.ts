@@ -61,6 +61,17 @@ import { ButtonComponent } from '../../shared/components/button.component';
             </div>
           </div>
         </section>
+
+        <section class="py-20 px-6 md:px-12 bg-slate-50">
+          <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12"><p class="text-sm font-bold uppercase tracking-widest text-navy mb-3">Simples e seguro</p><h2 class="text-3xl font-extrabold text-slate-900">Como funciona</h2><p class="text-slate-600 mt-3">Você acompanha tudo sem precisar se identificar.</p></div>
+            <div class="grid md:grid-cols-3 gap-8">
+              <div class="relative text-center"><div class="w-12 h-12 rounded-full bg-navy text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">1</div><h3 class="font-bold text-lg mb-2">Relate o ocorrido</h3><p class="text-sm text-slate-600">Descreva os fatos com segurança e, se quiser, envie evidências.</p></div>
+              <div class="relative text-center"><div class="w-12 h-12 rounded-full bg-navy text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">2</div><h3 class="font-bold text-lg mb-2">Receba seu protocolo</h3><p class="text-sm text-slate-600">Ao finalizar, salve o código exclusivo da sua denúncia.</p></div>
+              <div class="relative text-center"><div class="w-12 h-12 rounded-full bg-navy text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">3</div><h3 class="font-bold text-lg mb-2">Acompanhe o andamento</h3><p class="text-sm text-slate-600">Consulte as atualizações usando apenas o seu protocolo.</p></div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   `

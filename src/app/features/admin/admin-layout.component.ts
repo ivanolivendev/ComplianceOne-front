@@ -11,7 +11,7 @@ import { TokenService } from '../../core/services/token.service';
   template: `
     <div class="flex h-screen bg-slate-50 overflow-hidden">
       <!-- Sidebar -->
-      <aside class="w-72 bg-navy text-white flex flex-col shadow-2xl">
+      <aside [class.hidden]="!sidebarOpen" class="w-72 bg-navy text-white md:flex flex-col shadow-2xl fixed md:static inset-y-0 left-0 z-50">
         <!-- Logo -->
         <div class="p-8 flex items-center gap-3">
           <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
@@ -68,11 +68,14 @@ import { TokenService } from '../../core/services/token.service';
 
       <!-- Main Content -->
       <main class="flex-grow flex flex-col overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center px-8 justify-end">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-8 justify-between">
+          <button type="button" class="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100" (click)="sidebarOpen = !sidebarOpen" aria-label="Abrir menu administrativo">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
           <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">Status do Servidor:</span>
           <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">ONLINE</span>
         </header>
-        <div class="flex-grow overflow-auto p-8">
+        <div class="flex-grow overflow-auto p-4 md:p-8">
           <router-outlet></router-outlet>
         </div>
       </main>
@@ -83,8 +86,17 @@ export class AdminLayoutComponent {
   private readonly authService = inject(AuthService);
   private readonly tokenService = inject(TokenService);
 
-  userName = this.tokenService.decodeToken()?.sub || 'Usuário';
-  userRole = this.tokenService.getRole();
+  private readonly token = this.tokenService.decodeToken();
+  userName = this.formatTitle(this.token?.name || 'Usuário');
+  userRole = this.formatTitle(this.tokenService.getRole());
+  sidebarOpen = false;
+
+  private formatTitle(value: string): string {
+    return (value || 'Usuário')
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\S/g, (letter) => letter.toUpperCase());
+  }
 
   isAdmin(): boolean {
     return ['ADMIN', 'DIRETORIA'].includes(this.userRole);

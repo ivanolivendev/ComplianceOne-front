@@ -28,11 +28,12 @@ import { NotificationService } from '../../core/services/notification.service';
         <div class="text-3xl font-mono font-bold text-navy tracking-wider mb-6">
           {{ protocolo }}
         </div>
-        <app-button variant="outline" size="sm" (click)="copyProtocol()">Copiar Código</app-button>
+        <div class="flex flex-col sm:flex-row justify-center gap-2"><app-button variant="outline" size="sm" (click)="copyProtocol()">Copiar Código</app-button><app-button variant="outline" size="sm" (click)="printReceipt()">Imprimir</app-button></div>
+        <p class="text-xs text-slate-500 mt-4">Guarde este código. Ele será necessário para consultar sua denúncia.</p>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-4">
-        <app-button variant="secondary" [routerLink]="['/protocolo']">Consultar Status</app-button>
+        <app-button variant="secondary" (click)="consultProtocol()">Consultar Status</app-button>
         <app-button [routerLink]="['/']">Voltar ao Início</app-button>
       </div>
     </div>
@@ -53,7 +54,9 @@ export class SuccessComponent implements OnInit {
   }
 
   copyProtocol(): void {
-    navigator.clipboard.writeText(this.protocolo);
-    this.notify.success('Protocolo copiado para a área de transferência!');
+    navigator.clipboard?.writeText(this.protocolo).then(() => this.notify.success('Protocolo copiado para a área de transferência!'));
   }
+
+  consultProtocol(): void { this.router.navigate(['/protocolo'], { queryParams: { protocolo: this.protocolo } }); }
+  printReceipt(): void { window.print(); }
 }

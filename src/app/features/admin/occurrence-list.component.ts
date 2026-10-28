@@ -34,11 +34,15 @@ import { ButtonComponent } from '../../shared/components/button.component';
 
       <!-- Filters -->
       <div class="card-premium p-6 bg-white flex flex-wrap gap-4 items-end shadow-sm border border-slate-100">
+        <div class="flex-grow min-w-[240px]">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Buscar protocolo</label>
+          <input [(ngModel)]="filterProtocol" type="search" placeholder="Ex.: NR1-AB12CD34" class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-4 focus:ring-navy/10 outline-none transition-all" />
+        </div>
         <div class="flex-grow min-w-[200px]">
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Status</label>
           <select [(ngModel)]="filterStatus" class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-4 focus:ring-navy/10 outline-none transition-all">
             <option value="">Todos os Status</option>
-            <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+            <option *ngFor="let s of statusOptions" [value]="s">{{ label(s) }}</option>
           </select>
         </div>
 
@@ -46,7 +50,7 @@ import { ButtonComponent } from '../../shared/components/button.component';
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tipo</label>
           <select [(ngModel)]="filterTipo" class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-4 focus:ring-navy/10 outline-none transition-all">
             <option value="">Todos os Tipos</option>
-            <option *ngFor="let t of tipoOptions" [value]="t">{{ t.replace('_', ' ') }}</option>
+            <option *ngFor="let t of tipoOptions" [value]="t">{{ label(t) }}</option>
           </select>
         </div>
 
@@ -70,7 +74,7 @@ import { ButtonComponent } from '../../shared/components/button.component';
             <tbody class="divide-y divide-slate-100">
               <tr *ngFor="let item of filteredItems" class="hover:bg-slate-50/80 transition-colors">
                 <td class="px-6 py-4 font-mono text-sm font-bold text-navy">{{ item.protocolo }}</td>
-                <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ item.tipo.replace('_', ' ') }}</td>
+                <td class="px-6 py-4 text-sm text-slate-600 font-medium">{{ label(item.tipo) }}</td>
                 <td class="px-6 py-4 text-sm text-slate-500 text-center">{{ item.setorRelacionado || '—' }}</td>
                 <td class="px-6 py-4 text-center">
                   <app-badge [status]="item.status"></app-badge>
@@ -128,6 +132,7 @@ export class OccurrenceListComponent implements OnInit {
 
   filterStatus = '';
   filterTipo = '';
+  filterProtocol = '';
   statusOptions = Object.values(StatusOcorrencia);
   tipoOptions = Object.values(TipoOcorrencia);
 
@@ -161,14 +166,20 @@ export class OccurrenceListComponent implements OnInit {
 
   get filteredItems(): OcorrenciaResponse[] {
     return this.items.filter(item => {
+      const matchProtocol = !this.filterProtocol || item.protocolo.toLowerCase().includes(this.filterProtocol.toLowerCase().trim());
       const matchStatus = !this.filterStatus || item.status === this.filterStatus;
       const matchTipo = !this.filterTipo || item.tipo === this.filterTipo;
-      return matchStatus && matchTipo;
+      return matchProtocol && matchStatus && matchTipo;
     });
   }
 
   clearFilters(): void {
     this.filterStatus = '';
     this.filterTipo = '';
+    this.filterProtocol = '';
+  }
+
+  label(value: string): string {
+    return (value || '').toLowerCase().replace(/_/g, ' ').replace(/\b\S/g, letter => letter.toUpperCase());
   }
 }

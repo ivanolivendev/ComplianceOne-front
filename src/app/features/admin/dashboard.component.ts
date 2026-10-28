@@ -13,8 +13,12 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
   template: `
     <div class="space-y-8 animate-in fade-in duration-500">
       <header>
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-        <p class="text-slate-500 font-medium">Visão geral do sistema de compliance</p>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div><h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1><p class="text-slate-500 font-medium">Visão geral do sistema de compliance</p></div>
+          <button type="button" (click)="loadData()" [disabled]="loading" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50" aria-label="Atualizar dashboard">
+            <svg class="w-4 h-4" [class.animate-spin]="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.64 18.36A9 9 0 1018.36 5.64" /></svg> Atualizar
+          </button>
+        </div>
       </header>
 
       <!-- Error Message -->
@@ -26,6 +30,11 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
           <p class="font-bold">Erro ao carregar dados</p>
           <p class="text-sm opacity-90">{{ errorMsg }}</p>
         </div>
+      </div>
+
+      <div class="card-premium p-6 bg-white">
+        <div class="flex items-center justify-between mb-5"><div><h2 class="text-xl font-bold text-slate-900">Distribuição por status</h2><p class="text-sm text-slate-500">Visão rápida das ocorrências atuais.</p></div></div>
+        <div class="space-y-4"><div *ngFor="let status of statusSummary" class="flex items-center gap-4"><span class="w-32 text-sm font-semibold text-slate-600">{{ label(status.name) }}</span><div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-navy rounded-full transition-all" [style.width.%]="status.percent"></div></div><span class="w-8 text-right text-sm font-bold text-slate-700">{{ status.count }}</span></div></div>
       </div>
 
       <!-- Stats Grid -->
@@ -99,7 +108,7 @@ import { SkeletonComponent } from '../../shared/components/skeleton.component';
             <tbody class="divide-y divide-slate-100">
               <tr *ngFor="let item of recentItems" class="hover:bg-slate-50 transition-colors cursor-pointer" [routerLink]="['/admin/ocorrencias', item.id]">
                 <td class="px-6 py-4 font-mono text-sm font-bold text-navy">{{ item.protocolo }}</td>
-                <td class="px-6 py-4 text-sm text-slate-600">{{ item.tipo.replace('_', ' ') }}</td>
+                <td class="px-6 py-4 text-sm text-slate-600">{{ label(item.tipo) }}</td>
                 <td class="px-6 py-4">
                   <app-badge [status]="item.status"></app-badge>
                 </td>
@@ -139,6 +148,7 @@ export class DashboardComponent implements OnInit {
     analise: 0,
     concluidas: 0
   };
+  statusSummary: { name: string; count: number; percent: number }[] = [];
 
   ngOnInit(): void {
     this.loadData();
@@ -148,7 +158,7 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     this.errorMsg = '';
     
-    this.occurrenceService.list(0, 100).subscribe({
+    this.occurrenceService.list(0, 1000).subscribe({
       next: (res) => {
         const items = res.content || (Array.isArray(res) ? res : []);
         this.recentItems = items.slice(0, 5);
@@ -156,6 +166,8 @@ export class DashboardComponent implements OnInit {
         this.stats.recebidas = items.filter((i: any) => i.status === StatusOcorrencia.RECEBIDA).length;
         this.stats.analise = items.filter((i: any) => i.status === StatusOcorrencia.EM_TRIAGEM || i.status === StatusOcorrencia.EM_INVESTIGACAO).length;
         this.stats.concluidas = items.filter((i: any) => i.status === StatusOcorrencia.CONCLUIDA).length;
+        const total = Math.max(items.length, 1);
+        this.statusSummary = Object.values(StatusOcorrencia).map(status => ({ name: status, count: items.filter((i: any) => i.status === status).length, percent: Math.round(items.filter((i: any) => i.status === status).length / total * 100) }));
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -170,5 +182,9 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  label(value: string): string {
+    return (value || '').toLowerCase().replace(/_/g, ' ').replace(/\b\S/g, letter => letter.toUpperCase());
   }
 }

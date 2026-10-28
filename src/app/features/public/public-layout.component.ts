@@ -33,10 +33,18 @@ import { ButtonComponent } from '../../shared/components/button.component';
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-3">
+              <button type="button" class="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100" (click)="mobileMenuOpen = !mobileMenuOpen" aria-label="Abrir menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
               <app-button variant="outline" size="sm" routerLink="/login" class="hidden sm:block">Acesso Admin</app-button>
               <app-button size="sm" routerLink="/denunciar">Nova Denúncia</app-button>
             </div>
           </div>
+          <nav *ngIf="mobileMenuOpen" class="md:hidden border-t border-slate-100 py-3 space-y-1">
+            <a routerLink="/" (click)="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Início</a>
+            <a routerLink="/denunciar" (click)="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Denunciar</a>
+            <a routerLink="/protocolo" (click)="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50">Consultar protocolo</a>
+          </nav>
         </div>
       </header>
 
@@ -57,4 +65,5 @@ import { ButtonComponent } from '../../shared/components/button.component';
 })
 export class PublicLayoutComponent {
   private readonly router = inject(Router);
+  mobileMenuOpen = false;
 }

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Role } from '../../core/models/compliance.model';
 import { ButtonComponent } from '../../shared/components/button.component';
@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ButtonComponent, InputComponent],
   template: `
     <div class="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500">
       <header>
@@ -52,7 +52,7 @@ import { AuthService } from '../../core/services/auth.service';
                   class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-navy focus:ring-4 focus:ring-navy/10 outline-none appearance-none bg-white"
                 >
                   <option value="" disabled>Selecione a permissão...</option>
-                  <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                  <option *ngFor="let role of roles" [value]="role">{{ roleLabel(role) }}</option>
                 </select>
               </div>
             </div>
@@ -79,6 +79,14 @@ import { AuthService } from '../../core/services/auth.service';
           <p class="text-red-700">Apenas usuários com perfil de ADMIN ou DIRETORIA podem gerenciar usuários.</p>
         </div>
       }
+
+      <section *ngIf="canManage()" class="card-premium overflow-hidden bg-white">
+        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div><h2 class="text-xl font-bold text-slate-900">Usuários cadastrados</h2><p class="text-sm text-slate-500">Gerencie o acesso ao painel.</p></div>
+          <input [(ngModel)]="search" type="search" placeholder="Buscar usuário..." aria-label="Buscar usuário" class="px-4 py-2 rounded-lg border border-slate-200 outline-none focus:ring-4 focus:ring-navy/10">
+        </div>
+        <div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50"><tr><th class="px-6 py-3 text-xs uppercase text-slate-400">Nome</th><th class="px-6 py-3 text-xs uppercase text-slate-400">E-mail</th><th class="px-6 py-3 text-xs uppercase text-slate-400">Função</th><th class="px-6 py-3 text-xs uppercase text-slate-400">Status</th><th class="px-6 py-3"></th></tr></thead><tbody class="divide-y divide-slate-100"><tr *ngFor="let user of filteredUsers"><td class="px-6 py-4 font-semibold">{{ user.name }}</td><td class="px-6 py-4 text-sm text-slate-500">{{ user.email }}</td><td class="px-6 py-4 text-sm">{{ roleLabel(user.role) }}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-bold" [class]="user.active ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100'">{{ user.active ? 'Ativo' : 'Inativo' }}</span></td><td class="px-6 py-4 text-right"><button type="button" class="text-sm font-bold text-navy hover:underline" (click)="toggleActive(user)">{{ user.active ? 'Desativar' : 'Ativar' }}</button></td></tr></tbody></table><p *ngIf="!loadingUsers && filteredUsers.length === 0" class="p-8 text-center text-slate-400">Nenhum usuário encontrado.</p></div>
+      </section>
     </div>
   `
 })
@@ -89,6 +97,9 @@ export class UserManagementComponent {
   private readonly auth = inject(AuthService);
 
   loading = false;
+  loadingUsers = false;
+  search = '';
+  users: any[] = [];
   roles = Object.values(Role);
 
   userForm = this.fb.group({
@@ -103,6 +114,28 @@ export class UserManagementComponent {
     return currentRole === Role.ADMIN || currentRole === Role.DIRETORIA;
   }
 
+  roleLabel(role: string): string {
+    return role.toLowerCase().replace(/_/g, ' ').replace(/\b\S/g, letter => letter.toUpperCase());
+  }
+
+  get filteredUsers(): any[] {
+    const q = this.search.toLowerCase().trim();
+    return this.users.filter(user => !q || user.name.toLowerCase().includes(q) || user.email.toLowerCase().includes(q));
+  }
+
+  ngOnInit(): void { this.loadUsers(); }
+
+  loadUsers(): void {
+    if (!this.canManage()) return;
+    this.loadingUsers = true;
+    this.http.get<any[]>('/api/v1/users').subscribe({ next: users => { this.users = users; this.loadingUsers = false; }, error: () => { this.loadingUsers = false; this.notify.error('Não foi possível carregar os usuários.'); } });
+  }
+
+  toggleActive(user: any): void {
+    if (!window.confirm(`${user.active ? 'Desativar' : 'Ativar'} o usuário ${user.name}?`)) return;
+    this.http.patch<any>(`/api/v1/users/${user.id}/active?active=${!user.active}`, null).subscribe({ next: updated => { user.active = updated.active; this.notify.success(`Usuário ${updated.active ? 'ativado' : 'desativado'} com sucesso.`); }, error: () => this.notify.error('Não foi possível alterar o status do usuário.') });
+  }
+
   onSubmit(): void {
     if (this.userForm.invalid) return;
 
@@ -112,10 +145,12 @@ export class UserManagementComponent {
         this.loading = false;
         this.notify.success('Usuário criado com sucesso!');
         this.userForm.reset();
+        this.loadUsers();
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.notify.error('Erro ao criar usuário. Verifique as permissões.');
+        const message = err?.error?.message || '';
+        this.notify.error(message.toLowerCase().includes('email') ? 'Este e-mail já está cadastrado.' : 'Erro ao criar usuário. Verifique as permissões.');
       }
     });
   }

@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button.component';
 import { InputComponent } from '../../shared/components/input.component';
 import { OcorrenciaService } from '../../core/services/ocorrencia.service';
-import { AnexoService } from '../../core/services/anexo.service';
 import { TipoOcorrencia } from '../../core/models/compliance.model';
 import { NotificationService } from '../../core/services/notification.service';
-import { catchError, of, concatMap, from, map } from 'rxjs';
+import { AnexoService } from '../../core/services/anexo.service';
+import { concatMap, from, of, toArray } from 'rxjs';
 
 @Component({
   selector: 'app-report-wizard',
@@ -71,19 +71,19 @@ import { catchError, of, concatMap, from, map } from 'rxjs';
               </div>
 
               <div class="pt-4">
-                <label class="block text-sm font-semibold text-slate-700 mb-3 ml-1">Anexar Evidências (Opcional)</label>
+                <label class="block text-sm font-semibold text-slate-700 mb-3 ml-1">Evidências</label>
                 <div 
                   (click)="fileInput.click()"
                   class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-navy hover:bg-navy/5 transition-all cursor-pointer group bg-slate-50/50"
                 >
-                  <input #fileInput type="file" (change)="onFileSelected($event)" multiple class="hidden">
+                  <input #fileInput type="file" class="hidden" multiple accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" (change)="onFilesSelected($event)">
                   <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6 text-slate-400 group-hover:text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
-                  <p class="text-sm text-slate-900 font-semibold">Clique para selecionar arquivos</p>
-                  <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-wider">Imagens, PDF ou Documentos (Máx 10MB)</p>
+                  <p class="text-sm text-slate-500 font-semibold">Clique para selecionar arquivos</p>
+                  <p class="text-xs text-slate-400 mt-1">Imagens, PDF ou documentos (máx. 10 MB por arquivo)</p>
                 </div>
 
                 <div *ngIf="selectedFiles.length > 0" class="mt-4 space-y-2">
@@ -158,28 +158,8 @@ import { catchError, of, concatMap, from, map } from 'rxjs';
                     <p class="text-sm font-medium">{{ reportForm.value.anonima ? 'Sim' : 'Não' }}</p>
                   </div>
                 </div>
-                <div *ngIf="selectedFiles.length > 0">
-                  <span class="text-xs font-bold text-slate-400 uppercase">Anexos ({{ selectedFiles.length }})</span>
-                  <p class="text-sm font-medium text-navy">{{ selectedFiles.length }} arquivo(s) selecionado(s)</p>
-                </div>
               </div>
 
-              <!-- Upload Progress -->
-              <div *ngIf="loading && selectedFiles.length > 0" class="space-y-4 pt-4 border-t border-slate-100">
-                <p class="text-xs font-bold text-slate-400 uppercase">Enviando arquivos...</p>
-                <div *ngFor="let file of selectedFiles" class="space-y-1">
-                  <div class="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
-                    <span>{{ file.name }}</span>
-                    <span>{{ uploadProgress[file.name] || 0 }}%</span>
-                  </div>
-                  <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      class="h-full bg-navy transition-all duration-300" 
-                      [style.width.%]="uploadProgress[file.name] || 0"
-                    ></div>
-                  </div>
-                </div>
-              </div>
 
               <p class="text-sm text-slate-500 italic">Ao clicar em enviar, sua denúncia será processada pelo comitê de compliance de forma segura.</p>
             </div>
@@ -223,14 +203,13 @@ export class ReportWizardComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly occurrenceService = inject(OcorrenciaService);
-  private readonly anexoService = inject(AnexoService);
   private readonly notify = inject(NotificationService);
+  private readonly anexoService = inject(AnexoService);
 
   loading = false;
   currentStep = 0;
-  tipos = Object.values(TipoOcorrencia);
   selectedFiles: File[] = [];
-  uploadProgress: { [key: string]: number } = {};
+  tipos = Object.values(TipoOcorrencia);
 
   steps = [
     { title: 'O que aconteceu?', description: 'Relate os fatos e anexe evidências que ajudem na análise.' },
@@ -258,30 +237,25 @@ export class ReportWizardComponent {
     return true;
   }
 
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files || []);
+    const valid = files.filter(file => file.size <= 10 * 1024 * 1024);
+    if (valid.length !== files.length) this.notify.error('Cada arquivo deve ter no máximo 10 MB.');
+    this.selectedFiles = [...this.selectedFiles, ...valid].slice(0, 5);
+    input.value = '';
+  }
+
   nextStep(): void {
     if (this.currentStep < this.steps.length - 1) this.currentStep++;
   }
 
   prevStep(): void {
     if (this.currentStep > 0) this.currentStep--;
-  }
-
-  onFileSelected(event: any): void {
-    const files = event.target.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.size > 10 * 1024 * 1024) {
-          this.notify.error(`Arquivo ${file.name} é muito grande (Máx 10MB)`);
-          continue;
-        }
-        this.selectedFiles.push(file);
-      }
-    }
-  }
-
-  removeFile(index: number): void {
-    this.selectedFiles.splice(index, 1);
   }
 
   onSubmit(): void {
@@ -295,11 +269,16 @@ export class ReportWizardComponent {
 
     this.occurrenceService.create(formValue).subscribe({
       next: (res) => {
-        if (this.selectedFiles.length > 0) {
-          this.uploadFiles(res.id, res.protocolo);
-        } else {
-          this.finalize(res.protocolo);
-        }
+        from(this.selectedFiles).pipe(
+          concatMap(file => this.anexoService.upload(res.id, file)),
+          toArray()
+        ).subscribe({
+          next: () => this.finalize(res.protocolo),
+          error: () => {
+            this.loading = false;
+            this.notify.error('Denúncia criada, mas não foi possível enviar todos os anexos.');
+          }
+        });
       },
       error: (err) => {
         this.loading = false;
@@ -319,33 +298,6 @@ export class ReportWizardComponent {
       delete raw.dataOcorrencia;
     }
     return raw;
-  }
-
-  private uploadFiles(occurrenceId: string, protocolo: string): void {
-    // Reset progress tracking
-    this.selectedFiles.forEach(f => this.uploadProgress[f.name] = 0);
-
-    from(this.selectedFiles).pipe(
-      concatMap(file => this.anexoService.upload(occurrenceId, file).pipe(
-        catchError(err => {
-          const errorMsg = err.error?.message || err.message || 'Erro no upload';
-          console.error(`Erro no arquivo ${file.name}:`, err);
-          this.notify.error(`Falha ao enviar ${file.name}: ${errorMsg}`);
-          return of(null); // Continue with next file
-        }),
-        map(res => {
-          if (typeof res === 'number') {
-            this.uploadProgress[file.name] = res;
-          }
-          return res;
-        })
-      ))
-    ).subscribe({
-      complete: () => {
-        this.loading = false;
-        this.finalize(protocolo);
-      }
-    });
   }
 
   private finalize(protocolo: string): void {
