@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://complianceone-production.up.railway.app/api/v1'
+  apiUrl: 'https://complianceone-5a21.onrender.com/api/v1'
 };

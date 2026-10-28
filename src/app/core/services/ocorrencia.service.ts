@@ -9,8 +9,7 @@ import { environment } from '../../../environments/environment';
 })
 export class OcorrenciaService {
   private readonly http = inject(HttpClient);
-  // Bypass do proxy
-  private readonly apiUrl = 'http://localhost:8080/api/v1/ocorrencias';
+  private readonly apiUrl = `${environment.apiUrl}/ocorrencias`;
 
   create(request: OcorrenciaRequest): Observable<OcorrenciaResponse> {
     return this.http.post<OcorrenciaResponse>(this.apiUrl, request);

@@ -9,8 +9,7 @@ import { environment } from '../../../environments/environment';
 })
 export class AnexoService {
   private readonly http = inject(HttpClient);
-  // Bypass do proxy do Angular que está travado no Railway
-  private readonly apiUrl = 'http://localhost:8080/api/v1/ocorrencias';
+  private readonly apiUrl = `${environment.apiUrl}/ocorrencias`;
 
   upload(ocorrenciaId: string, file: File): Observable<number | AnexoUploadResponse> {
     const formData = new FormData();
@@ -41,12 +40,12 @@ export class AnexoService {
   }
 
   download(anexoId: string): Observable<Blob> {
-    return this.http.get(`http://localhost:8080/api/v1/ocorrencias/anexos/${anexoId}`, {
+    return this.http.get(`${environment.apiUrl}/ocorrencias/anexos/${anexoId}`, {
       responseType: 'blob'
     });
   }
 
   getPreviewUrl(anexoId: string): string {
-    return `http://localhost:8080/api/v1/ocorrencias/anexos/${anexoId}`;
+    return `${environment.apiUrl}/ocorrencias/anexos/${anexoId}`;
   }
 }
