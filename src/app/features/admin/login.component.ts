@@ -54,6 +54,12 @@ import { NotificationService } from '../../core/services/notification.service';
             </app-button>
           </form>
 
+          <div class="mt-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <p class="font-semibold">Acesso administrativo de demonstração</p>
+            <p class="mt-1">Usuário: <strong>admin@example.com</strong></p>
+            <p>Senha: <strong>admin123</strong></p>
+          </div>
+
           <div class="mt-8 text-center">
             <a routerLink="/" class="text-sm font-semibold text-navy hover:underline flex items-center justify-center gap-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
